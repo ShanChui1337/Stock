@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UStockLogMapper">
+    
+    <resultMap type="UStockLog" id="UStockLogResult">
+        <result property="id"    column="id"    />
+        <result property="gid"    column="gid"    />
+        <result property="sid"    column="sid"    />
+        <result property="uid"    column="uid"    />
+        <result property="stype"    column="stype"    />
+        <result property="snum"    column="snum"    />
+        <result property="slx"    column="slx"    />
+    </resultMap>
+
+
+    <sql id="selectUStockLogVo">
+        select u_stock_log.uid,u_stock_log.id,u_stock_log.sid,u_goods.s_name,u_goods.s_img,u_goods.s_lb,u_stock_log.gid,u_store.s_name cname ,u_store.s_address,u_store.s_contenct ,u_stock_log.snum, if(u_stock_log.stype=1,'入库','出库') stype ,u_stock_log.slx,(select user_name from sys_user where sys_user.user_id=u_stock_log.uid) uname  from u_stock_log LEFT JOIN u_goods on u_goods.sid=u_stock_log.sid  LEFT JOIN u_store on u_store.uid=u_stock_log.gid
+    </sql>
+
+    <select id="selectUStockLogList" parameterType="UStockLog" resultType="java.util.Map">
+        <include refid="selectUStockLogVo"/>
+        <where>
+            <if test="gid != null  and gid != ''"> and u_stock_log.gid = #{gid}</if>
+            <if test="sid != null  and sid != ''"> and u_stock_log.sid = #{sid}</if>
+            <if test="uid != null  and uid != ''"> and u_stock_log.uid = #{uid}</if>
+            <if test="stype != null  and stype != ''"> and u_stock_log.stype = #{stype}</if>
+            <if test="snum != null  and snum != ''"> and u_stock_log.snum = #{snum}</if>
+
+        </where>
+    </select>
+    
+    <select id="selectUStockLogById" parameterType="String" resultMap="UStockLogResult">
+        <include refid="selectUStockLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertUStockLog" parameterType="UStockLog" useGeneratedKeys="true" keyProperty="id">
+        insert into u_stock_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="gid != null and gid != ''">gid,</if>
+            <if test="sid != null and sid != ''">sid,</if>
+            <if test="uid != null and uid != ''">uid,</if>
+            <if test="stype != null and stype != ''">stype,</if>
+            <if test="snum != null and snum != ''">snum,</if>
+            <if test="slx != null">slx,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="gid != null and gid != ''">#{gid},</if>
+            <if test="sid != null and sid != ''">#{sid},</if>
+            <if test="uid != null and uid != ''">#{uid},</if>
+            <if test="stype != null and stype != ''">#{stype},</if>
+            <if test="snum != null and snum != ''">#{snum},</if>
+            <if test="slx != null">#{slx},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUStockLog" parameterType="UStockLog">
+        update u_stock_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="gid != null and gid != ''">gid = #{gid},</if>
+            <if test="sid != null and sid != ''">sid = #{sid},</if>
+            <if test="uid != null and uid != ''">uid = #{uid},</if>
+            <if test="stype != null and stype != ''">stype = #{stype},</if>
+            <if test="snum != null and snum != ''">snum = #{snum},</if>
+            <if test="slx != null">slx = #{slx},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUStockLogById" parameterType="String">
+        delete from u_stock_log where id = #{id}
+    </delete>
+
+    <delete id="deleteUStockLogByIds" parameterType="String">
+        delete from u_stock_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

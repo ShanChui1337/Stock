@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('百度ECharts')" />
+</head>
+<body class="gray-bg">
+
+<div class="row  border-bottom white-bg dashboard-header">
+    <div class="col-sm-12">
+        <p>公告:</a>
+        <span th:each="user:${gg}">
+            <span style="color: #db8b0b" th:text="${user.noticeContent}"></span> 
+
+        </span>
+        </p>
+
+    </div>
+</div>
+<div class="row  border-bottom white-bg dashboard-header">
+    <div class="col-sm-12">
+        <p>仓库出入库数据统计</a>
+        </p>
+
+
+
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>出入库折线图</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts-line-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>出入库柱状图</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts-bar-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: echarts-js" />
+<script type="text/javascript">
+    $(function () {
+        var prefix = ctx + "system/log";
+        var rn;
+        var cn;
+        var da;
+        $.ajax({
+            type: "post",
+            url:  prefix + "/tj",
+            data: {
+
+            },
+            success: function(data) {
+
+                rn=data.rn;
+                cn=data.cn;
+                da=data.da;
+                console.log(rn)
+                console.log(cn)
+                console.log(da)
+                var lineChart = echarts.init(document.getElementById("echarts-line-chart"));
+                var lineoption = {
+                    title : {
+                        text: '仓库商品统计'
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['入库','出库']
+                    },
+                    grid:{
+                        x:40,
+                        x2:40,
+                        y2:24
+                    },
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : da
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                            axisLabel : {
+                                formatter: '{value} 件'
+                            }
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'入库',
+                            type:'line',
+                            data:rn,
+                            markPoint : {
+                                data : [
+                                    {type : 'max', name: '最大值'},
+                                    {type : 'min', name: '最小值'}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均值'}
+                                ]
+                            }
+                        },
+                        {
+                            name:'出库',
+                            type:'line',
+                            data:cn,
+                            markPoint : {
+                                data : [
+                                    {name : '周最低', value : -2, xAxis: 1, yAxis: -1.5}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name : '平均值'}
+                                ]
+                            }
+                        }
+                    ]
+                };
+                lineChart.setOption(lineoption);
+                console.log(lineoption)
+                $(window).resize(lineChart.resize);
+
+
+
+
+
+                var barChart = echarts.init(document.getElementById("echarts-bar-chart"));
+                var baroption = {
+                    title : {
+                        text: '出入口统计图'
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['入库','出库']
+                    },
+                    grid:{
+                        x:30,
+                        x2:40,
+                        y2:24
+                    },
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            data : da
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value'
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'入库',
+                            type:'bar',
+                            data:rn,
+                            markPoint : {
+                                data : [
+                                    {type : 'max', name: '最大值'},
+                                    {type : 'min', name: '最小值'}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均值'}
+                                ]
+                            }
+                        },
+                        {
+                            name:'出库',
+                            type:'bar',
+                            data:cn,
+                            markPoint : {
+                                data : [
+                                    {name : '最高', value : 182.2, xAxis: 7, yAxis: 183, symbolSize:18},
+                                    {name : '最低', value : 2.3, xAxis: 11, yAxis: 3}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name : '平均值'}
+                                ]
+                            }
+                        }
+                    ]
+                };
+                barChart.setOption(baroption);
+
+                window.onresize = barChart.resize;
+
+
+            }
+        });
+
+
+
+
+
+
+
+    });
+</script>
+</body>
+</html>

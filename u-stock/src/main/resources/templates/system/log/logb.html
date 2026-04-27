@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('【请填写功能名称】列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+
+
+
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" id="sx" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;刷新</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+<!--                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:log:add">-->
+<!--                    <i class="fa fa-plus"></i> 添加-->
+<!--                </a>-->
+<!--                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:log:edit">-->
+<!--                    <i class="fa fa-edit"></i> 修改-->
+<!--                </a>-->
+<!--                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:log:remove">-->
+<!--                    <i class="fa fa-remove"></i> 删除-->
+<!--                </a>-->
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:log:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:log:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:log:remove')}]];
+        var prefix = ctx + "system/log";
+
+        function ty(sid,gid,snum,id,stype){
+
+            $.ajax({
+                type: "post",
+                url:  prefix + "/ty",
+                data: {
+                    "sid": sid,
+                    "gid": gid,
+                    "snum": snum,
+                    "id": id,
+                    "stype":stype
+                },
+                success: function(data) {
+                    $('#sx').click()
+                    layer.msg(data.mes, {
+                        icon: 1,
+                        time: 500,
+                    },)
+                }
+            });
+        }
+        function jj(sid,gid,snum,id,stype){
+            $.ajax({
+                type: "post",
+                url:  prefix + "/jj",
+                data: {
+                    "sid": sid,
+                    "gid": gid,
+                    "snum": snum,
+                    "id": id,
+                    "stype":stype
+                },
+                success: function(data) {
+                    $('#sx').click()
+                    layer.msg("data.mes", {
+                        icon: 1,
+                        time: 500,
+                    },)
+                }
+            });
+        }
+
+
+        $(function() {
+            var options = {
+                url: prefix + "/listz",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "【请填写功能名称】",
+                columns: [{
+                    checkbox: true
+                },
+                    {
+                        field: 'sid',
+                        title: '商品id'
+                    },
+                    {
+                        field: 'sName',
+                        title: '商品名字'
+                    },
+                    {
+                        field: 'sImg',
+                        title: '图片',
+                        formatter: function(value, row, index) {
+
+                            var  content = "<img src=" + row.sImg + " alt='' style='width:75px;height:75px' />"
+                            return content;
+                        }
+                    },
+                    {
+                        field: 'sLb',
+                        title: '商品类别'
+                    },
+                    {
+                        field: 'gid',
+                        title: '仓库ID'
+                    },
+                    {
+                        field: 'cname',
+                        title: '仓库名字'
+                    },
+                    {
+                        field: 'sAddress',
+                        title: '仓库地址'
+                    },
+                    {
+                        field: 'sContenct',
+                        title: '仓库内容'
+                    },
+                    {
+                        field: 'snum',
+                        title: '数量'
+                    },
+                    {
+                        field: 'stype',
+                        title: '类型'
+                    },
+                    {
+                        field: 'uname',
+                        title: '操作人'
+                    },
+                    {
+                        field: 'tim',
+                        title: '操作时间'
+                    }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

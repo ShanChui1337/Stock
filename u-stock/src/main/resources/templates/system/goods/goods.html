@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('商品管理')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>商品名字：</label>
+                                <input type="text" name="sName"/>
+                            </li>
+                            <li>
+                                <label>商品类别：</label>
+                                <input type="text" name="sLb"/>
+                            </li>
+
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" id="sc" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" id="cz" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:goods:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:goods:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:goods:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:goods:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:goods:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:goods:remove')}]];
+        var prefix = ctx + "system/goods";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "商品管理",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'sid',
+                    title: '商品编号',
+                    visible: false
+                },
+                {
+                    field: 'sName',
+                    title: '商品名字'
+                },
+                {
+                    field: 'sImg',
+                    title: '图片路径',
+                    formatter: function(value, row, index) {
+
+                       var  content = "<img src=" + row.sImg + " alt='' style='width:75px;height:75px' />"
+                        return content;
+                    }
+                },
+                {
+                    field: 'sLb',
+                    title: '商品类别'
+                },
+                {
+                    field: 'sTime',
+                    title: '添加时间'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="upLoadImg(\'' + row.sid + '\')"><i class="fa fa-upload"></i>添加图片</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.sid + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.sid + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+
+
+        });
+
+        function upLoadImg(id){
+            //alert(id)
+            //$.modal.open('上传图片',);
+            //$.modal.openOptions(prefix + "/img?id="+id);
+            //var _url = $.operate.detailUrl(id);
+            var options = {
+                title: "上传图片",
+                width: '800',
+                height: '500',
+                url: prefix+"/img?id="+id,
+                skin: 'layui-layer-gray',
+                btn: ['关闭'],
+                yes: function (index, layero) {
+                    $('#rz').click()
+                    $('#sc').click()
+                    $.modal.close(index);
+                }
+            };
+            $.modal.openOptions(options);
+        }
+    </script>
+</body>
+</html>

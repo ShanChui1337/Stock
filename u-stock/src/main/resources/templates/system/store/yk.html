@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('【请填写功能名称】列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label >新仓库ID：</label>
+                            <div class="col-sm-9">
+                                <select  id="ngid" class="form-control" name="ngid" th:with="type=${ck}" required>
+                                    <option th:each="uck : ${type}" th:text="${uck.sName}" th:value="${uck.uid}" ></option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+<!--                             <-- <label>商品ID：</label>-->
+
+                            <div class="col-sm-9">
+                                <input id="sid" name="sid" th:value="${sid}" class="form-control" type="text" style="display:none" >
+                            </div>
+                        </li>
+                        <li>
+
+                            <div class="col-sm-9">
+                                <input id="ogid" name="ogid" th:value="${ogid}" class="form-control" type="text" style="display:none" >
+                            </div>
+                        </li>
+
+                        <li>
+                            <label>数量：</label>
+                            <div class="col-sm-9">
+                                <input id="snum" name="snum"  class="form-control" required >
+                                <input id="snum1" name="snum1"  th:value="${snum}" class="form-control"  style="display:none">
+                            </div>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="rck()"><i class="fa fa-search"></i>移库</a>
+<!--                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>-->
+<!--                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>-->
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('system:stock:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('system:stock:remove')}]];
+    var prefix = ctx + "system/stock";
+    var prefix1 =ctx + "system/store";
+
+    function rck(){
+
+        var ngid=$('#ngid').val();//新库
+        var sid=$('#sid').val();//商品ID
+        var ogid=$('#ogid').val();//老库ID
+        var snum=$('#snum').val();//商品数量   后输入数量
+        var snum1=$('#snum1').val();//商品数量
+
+
+        if(snum==''){
+            layer.msg("请输入移库数量", {
+                icon: 7,
+                time: 500,
+
+            },);
+
+        }else if(parseInt(snum,"10")>parseInt(snum1,"10")){
+            layer.msg("库存不足", {
+                icon: 7,
+                time: 500,
+
+            },);
+        }else{
+
+            $.ajax({
+                url: prefix + "/ykk",
+                data: $('#formId').serialize(),
+                type: "post",
+                success: function(result) {
+                    if (result.code == web_status.SUCCESS) {
+                        console.log(result)
+                        $('#snum1').val(parseInt(snum1,"10")-parseInt(snum,"10"));//商品数量
+                        layer.msg(result.mes, {
+                            icon: 1,
+                            time: 500,
+                        },function() {
+                            //$('#re').click()
+                            $.modal.closeTab();
+                            $.modal.openTab("仓库详情",prefix1 + "/ckxq?gid="+ogid);
+                        });
+                    } else {
+                        alert(result.msg);
+                    }
+                }
+            })
+        }
+    }
+
+
+</script>
+</body>
+</html>
